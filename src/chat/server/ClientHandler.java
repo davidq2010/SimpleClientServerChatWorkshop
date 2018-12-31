@@ -80,7 +80,6 @@ public class ClientHandler implements Runnable {
 			}
 		}
 		closeResources();
-		parentServer.removeHandlerByID(handlerID);
 	}
 	
 	public void writeMessageToClient(String message) {
@@ -91,7 +90,6 @@ public class ClientHandler implements Runnable {
 			System.err.println("ERROR: Could not send message to " + clientUsername);
 			System.err.println("Removing " + clientUsername + " from the chat.");
 			closeResources();
-			parentServer.removeHandlerByID(handlerID);
 		}
 	}
 	
@@ -115,6 +113,6 @@ public class ClientHandler implements Runnable {
 			System.err.println("WARNING: ClientHandler resources failed to close.");
 		}
 		
-		// Remove myself from server's handler list
+		parentServer.removeHandlerByID(handlerID);
 	}
 }
