@@ -57,6 +57,7 @@ public class Client {
 					try {
 						String message = (String) fromServer.readObject();
 						System.out.println(message);
+						System.out.print("> ");
 					} catch (ClassNotFoundException e) {
 						// It's a String, won't throw exception
 					} catch (IOException e) {
@@ -72,6 +73,7 @@ public class Client {
 		
 		Scanner userInput = new Scanner(System.in);
 		while ( true ) {
+			System.out.print("> ");
 			String message = userInput.nextLine();
 			
 			if ( message.equalsIgnoreCase("LOGOUT") ) {

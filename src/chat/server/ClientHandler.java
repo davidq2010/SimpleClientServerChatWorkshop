@@ -75,7 +75,7 @@ public class ClientHandler implements Runnable {
 				break loop;
 			case MESSAGE:
 				System.out.println( clientUsername + ": " + chatMessage.getMessage() );
-				parentServer.broadCast( chatMessage.getMessage() );
+				parentServer.broadCast( clientUsername + ": " + chatMessage.getMessage() );
 				break;
 			}
 		}
