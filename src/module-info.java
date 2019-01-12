@@ -5,5 +5,6 @@
  * @author davidqin
  *
  */
-module SimleClientServerChat1 {
+module SimpleClientServerChat1 {
+	requires java.desktop;
 }
