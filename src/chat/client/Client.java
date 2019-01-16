@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 
 public class Client {
 	
-	public Client(String host, int port, String userName) throws RuntimeException { 
+	public Client(String host, int port, String userName) { 
 		try {
 			Socket connWithServer = new Socket(host,port);
 		} catch (UnknownHostException e) {
