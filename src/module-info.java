@@ -5,5 +5,5 @@
  * @author davidqin
  *
  */
-module SimleClientServerChat1 {
+module SimpleClientServerChat1 {
 }
