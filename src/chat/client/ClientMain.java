@@ -3,7 +3,11 @@ package chat.client;
 // Client Main
 public class ClientMain {
 	public static void main(String[] args) {
-		Client client = new Client("192.168.1.7", 1234, "Dave");
-		client.run();
+		try {
+			new Client("localhost", 1234, "David");
+		} catch(RuntimeException e) {
+			System.err.println(e.getMessage());
+			System.err.println(e.getStackTrace());
+		}
 	}
 }
