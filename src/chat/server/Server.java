@@ -74,7 +74,7 @@ public class Server {
 		System.out.println("Number of Threads: " + threads.size());
 	}
 	
-	synchronized public void broadCast(String message) {
+	public void broadCast(String message) {
 		for ( int i = handlers.size() - 1; i >= 0; i-- ) {
 			handlers.get(i).writeMessageToClient(message);
 		}
