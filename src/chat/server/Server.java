@@ -2,6 +2,7 @@ package chat.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Server {
 	
@@ -23,13 +24,24 @@ public class Server {
 		while(true) {
 			System.out.println("Waiting for connections on port " + port + "...");
 			
+			Socket connWithClient;
+			int handlerID = 0;
+			
 			try {
-				serverSocket.accept();	// accept() waits until connection established
+				connWithClient = serverSocket.accept();	// accept() waits until connection established
 				System.out.println("Connection established!");
 				
 			} catch (IOException e) {
 				System.err.println("WARNING: Could not establish connection with client attempting to join.");
+				continue;
 			}
+			
+			System.out.println("Creating new client handler for new client...");
+			ClientHandler handler = new ClientHandler(connWithClient, handlerID);
+			
+			Thread thread = new Thread(handler);
+			thread.start();
+			System.out.println("ClientHandler was created and successfully started on new thread.");
 		}
 	}
 }
