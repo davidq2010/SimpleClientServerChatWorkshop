@@ -55,7 +55,6 @@ public class Server {
 			
 			System.out.println("Number of Handlers: " + handlers.size());
 			System.out.println("Number of Threads: " + threads.size());
-
 		}
 	}
 }
