@@ -38,6 +38,7 @@ public class Server {
 			
 			System.out.println("Creating new client handler for new client...");
 			ClientHandler handler = new ClientHandler(connWithClient, handlerID);
+			handlerID++;
 			
 			Thread thread = new Thread(handler);
 			thread.start();
