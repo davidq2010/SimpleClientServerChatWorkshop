@@ -43,13 +43,19 @@ public class Server {
 			
 			System.out.println("Creating new client handler for new client...");
 			ClientHandler handler = new ClientHandler(connWithClient, handlerID);
-			System.out.println();
+			
+			System.out.println(handler.getClientUsername() + "has joined.");
 			handlers.add(handler);
 			handlerID++;
 			
 			Thread thread = new Thread(handler);
+			threads.add(thread);
 			thread.start();
 			System.out.println("ClientHandler was created and successfully started on new thread.");
+			
+			System.out.println("Number of Handlers: " + handlers.size());
+			System.out.println("Number of Threads: " + threads.size());
+
 		}
 	}
 }
