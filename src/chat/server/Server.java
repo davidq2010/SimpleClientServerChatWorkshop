@@ -45,7 +45,7 @@ public class Server {
 			System.out.println("Creating new client handler for new client...");
 			ClientHandler handler = new ClientHandler(connWithClient, handlerID, this);
 			
-			System.out.println(handler.getClientUsername() + "has joined.");
+			System.out.println(handler.getClientUsername() + " has joined.");
 			handlers.add(handler);
 			handlerID++;
 			
