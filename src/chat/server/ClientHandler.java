@@ -64,4 +64,11 @@ public class ClientHandler implements Runnable {
 
 	}
 
+	public String getClientUsername() {
+		return clientUsername;
+	}
+	
+	public int getHandlerID() {
+		return handlerID;
+	}
 }
