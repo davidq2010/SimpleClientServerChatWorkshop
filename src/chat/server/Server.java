@@ -3,14 +3,19 @@ package chat.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Server {
 	
 	private int port;
 	private ServerSocket serverSocket;
+	private ArrayList<ClientHandler> handlers;
+	private ArrayList<Thread> threads;
 	
 	public Server(int port) {
 		this.port = port;
+		this.handlers = new ArrayList<>();
+		this.threads = new ArrayList<>();
 	}
 	
 	public void start() throws RuntimeException {
@@ -38,6 +43,8 @@ public class Server {
 			
 			System.out.println("Creating new client handler for new client...");
 			ClientHandler handler = new ClientHandler(connWithClient, handlerID);
+			handlers.add(handler);
+			
 			
 			Thread thread = new Thread(handler);
 			thread.start();
