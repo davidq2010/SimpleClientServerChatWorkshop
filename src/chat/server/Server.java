@@ -23,6 +23,7 @@ public class Server {
 			serverSocket = new ServerSocket(port);
 		} catch (IOException e) {
 			String message = "ERROR: Could not bind server socket to port " + port + ".";
+			closeResources();
 			throw new RuntimeException(message, e.fillInStackTrace());
 		}
 		
@@ -36,13 +37,13 @@ public class Server {
 				connWithClient = serverSocket.accept();	// accept() waits until connection established
 				System.out.println("Connection established!");
 				
-			} catch (IOException e) {
+			} catch (IOException e) {	// Don't want to shut server down
 				System.err.println("WARNING: Could not establish connection with client attempting to join.");
 				continue;
 			}
 			
 			System.out.println("Creating new client handler for new client...");
-			ClientHandler handler = new ClientHandler(connWithClient, handlerID);
+			ClientHandler handler = new ClientHandler(connWithClient, handlerID, this);
 			
 			System.out.println(handler.getClientUsername() + "has joined.");
 			handlers.add(handler);
@@ -55,6 +56,38 @@ public class Server {
 			
 			System.out.println("Number of Handlers: " + handlers.size());
 			System.out.println("Number of Threads: " + threads.size());
+		}
+	}
+	
+	synchronized void removeHandlerByID(int id) {
+		for(int i = 0; i < handlers.size(); i++) {
+			if(id == handlers.get(i).getHandlerID()) {
+				
+				handlers.remove(i);
+				threads.get(i).interrupt();
+				threads.remove(i);
+				System.out.println("Client " + id + " has been disconnected.");
+				
+				break;
+			}
+		}
+		System.out.println("Number of Handlers: " + handlers.size());
+		System.out.println("Number of Threads: " + threads.size());
+	}
+	
+	private void closeResources() {
+		try {
+			if (serverSocket != null) {
+				serverSocket.close();
+			} 
+		} catch (IOException e) {
+			String message = "WARNING: Error closing server socket.";
+			throw new RuntimeException(message, e.fillInStackTrace());
+		}
+		
+		System.out.println("Shutting down threads...");
+		for (Thread thread : threads) { 
+			thread.interrupt();
 		}
 	}
 }

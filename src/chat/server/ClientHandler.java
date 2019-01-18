@@ -18,15 +18,18 @@ public class ClientHandler implements Runnable {
 
 	private Socket connWithClient;
 	private int handlerID;
-	
+	private String clientUsername;
+
 	// Streams to communicate with client
 	private ObjectOutputStream toClient;
 	private ObjectInputStream fromClient;
-	private String clientUsername;
 	
-	public ClientHandler(Socket connWithClient, int handlerID) {
+	private Server parentServer;
+	
+	public ClientHandler(Socket connWithClient, int handlerID, Server parentServer) {
 		this.connWithClient = connWithClient;
 		this.handlerID = handlerID;
+		this.parentServer = parentServer;
 		
 		// Output stream first
 		try {
@@ -34,6 +37,7 @@ public class ClientHandler implements Runnable {
 			toClient.flush();
 		} catch (IOException e) {
 			String message = "ERROR: Could not create output stream to client.";
+			closeResources();
 			throw new RuntimeException(message, e.fillInStackTrace());
 		}
 		
@@ -41,6 +45,7 @@ public class ClientHandler implements Runnable {
 			fromClient = new ObjectInputStream(new BufferedInputStream(connWithClient.getInputStream()));
 		} catch (IOException e) {
 			String message = "ERROR: Could not create input stream from client.";
+			closeResources();
 			throw new RuntimeException(message, e.fillInStackTrace());
 		}
 		
@@ -50,9 +55,11 @@ public class ClientHandler implements Runnable {
 			clientUsername = (String) fromClient.readObject();
 		} catch (ClassNotFoundException e) {
 			String message = "ERROR: String is not a class???";
+			closeResources();
 			throw new RuntimeException(message, e.fillInStackTrace());
 		} catch (IOException e) {
 			String message = "ERROR: Could not retrieve username from client.";
+			closeResources();
 			throw new RuntimeException(message, e.fillInStackTrace());		
 		}
 		
@@ -70,5 +77,21 @@ public class ClientHandler implements Runnable {
 	
 	public int getHandlerID() {
 		return handlerID;
+	}
+	
+	private void closeResources() {
+		try {
+			if (connWithClient != null)
+				connWithClient.close();
+			if (fromClient != null)
+				fromClient.close();
+			if (toClient != null)
+				toClient.close();
+		} catch (IOException e) {
+			String message = "WARNING: ClientHandler " + handlerID + " failed to close resources.";
+			throw new RuntimeException(message, e.fillInStackTrace());
+		}
+		
+		parentServer.removeHandlerByID(handlerID);
 	}
 }
