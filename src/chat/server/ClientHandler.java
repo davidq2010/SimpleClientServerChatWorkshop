@@ -22,6 +22,7 @@ public class ClientHandler implements Runnable {
 	// Streams to communicate with client
 	private ObjectOutputStream toClient;
 	private ObjectInputStream fromClient;
+	private String clientUsername;
 	
 	public ClientHandler(Socket connWithClient, int handlerID) {
 		this.connWithClient = connWithClient;
@@ -44,6 +45,18 @@ public class ClientHandler implements Runnable {
 		}
 		
 		System.out.println("Successfully created communication streams with client.");
+		
+		try {
+			clientUsername = (String) fromClient.readObject();
+		} catch (ClassNotFoundException e) {
+			String message = "ERROR: String is not a class???";
+			throw new RuntimeException(message, e.fillInStackTrace());
+		} catch (IOException e) {
+			String message = "ERROR: Could not retrieve username from client.";
+			throw new RuntimeException(message, e.fillInStackTrace());		
+		}
+		
+		System.out.println("Successfully retrieved username from client.");
 	}
 
 	@Override
