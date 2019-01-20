@@ -8,11 +8,15 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import chat.common.ChatMessage;
+import chat.common.MessageType;
+
 public class Client {
 	
 	private Socket connWithServer;
 	private ObjectOutputStream toServer;
 	private ObjectInputStream fromServer;
+	private Thread listener;
 	
 	public Client(String host, int port, String userName) { 
 		try {
@@ -60,7 +64,43 @@ public class Client {
 		System.out.println("You are logged in as " + userName);
 	}
 	
-	private void closeResources() {
+	public void start() {
+		listener = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				while (!Thread.interrupted()) {
+					try {
+						String message = (String) fromServer.readObject();
+						System.out.println(message);
+						System.out.print("> ");
+					} catch (ClassNotFoundException e) {
+						// It's a String, won't throw exception
+					} catch (IOException e) {
+						// When ClientHandler closes socket
+						System.err.println("WARNING: Listener thread closed.");
+						break;
+					}
+				}
+			}
+			
+		});
+		
+		listener.start();
+	}
+	
+	public void sendMessage(String message) throws IOException {	// Let ClientMain handle
+		if (message.equalsIgnoreCase("LOGOUT")) {
+			toServer.writeObject(new ChatMessage(MessageType.LOGOUT));
+		}
+		else {
+			toServer.writeObject(new ChatMessage(MessageType.MESSAGE, message));
+		}
+		toServer.flush();
+	}
+	
+	public void closeResources() {
 		try {
 			if ( connWithServer != null )
 				connWithServer.close();
@@ -68,6 +108,8 @@ public class Client {
 				fromServer.close();
 			if ( toServer != null )
 				toServer.close();
+			if ( listener != null )
+				listener.interrupt();
 		} catch (Exception e) {
 			System.err.println("ERROR: Failed to close all resources.");
 		}

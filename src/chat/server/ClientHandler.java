@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import chat.common.ChatMessage;
+
 /**
  * ClientHandler represents the server-side endpoint of the connection with a client
  * @author davidqin
@@ -26,7 +28,8 @@ public class ClientHandler implements Runnable {
 	
 	private Server parentServer;
 	
-	public ClientHandler(Socket connWithClient, int handlerID, Server parentServer) {
+	public ClientHandler(Socket connWithClient, int handlerID, Server parentServer) 
+			throws IOException {
 		this.connWithClient = connWithClient;
 		this.handlerID = handlerID;
 		this.parentServer = parentServer;
@@ -38,7 +41,7 @@ public class ClientHandler implements Runnable {
 		} catch (IOException e) {
 			String message = "ERROR: Could not create output stream to client.";
 			closeResources();
-			throw new RuntimeException(message, e.fillInStackTrace());
+			throw new IOException(message, e);
 		}
 		
 		try {
@@ -46,7 +49,7 @@ public class ClientHandler implements Runnable {
 		} catch (IOException e) {
 			String message = "ERROR: Could not create input stream from client.";
 			closeResources();
-			throw new RuntimeException(message, e.fillInStackTrace());
+			throw new IOException(message, e);
 		}
 		
 		System.out.println("Successfully created communication streams with client.");
@@ -56,11 +59,11 @@ public class ClientHandler implements Runnable {
 		} catch (ClassNotFoundException e) {
 			String message = "ERROR: String is not a class???";
 			closeResources();
-			throw new RuntimeException(message, e.fillInStackTrace());
+			throw new RuntimeException(message, e);
 		} catch (IOException e) {
 			String message = "ERROR: Could not retrieve username from client.";
 			closeResources();
-			throw new RuntimeException(message, e.fillInStackTrace());		
+			throw new IOException(message, e);
 		}
 		
 		System.out.println("Successfully retrieved username from client.");
@@ -68,7 +71,37 @@ public class ClientHandler implements Runnable {
 
 	@Override
 	public void run() {
-
+		loop: while (!Thread.interrupted()) {
+			ChatMessage chatMessage;
+			try {
+				chatMessage = (ChatMessage) fromClient.readObject();
+			} catch (ClassNotFoundException e) {
+				String message = "ERROR: ChatMessage is not a class???";
+				closeResources();
+				throw new RuntimeException(message, e);
+			} catch (IOException e) {
+				String message = "ERROR: Could not read chat message from client " + clientUsername;
+				closeResources();
+				System.err.println(message);
+				return;
+			}
+			
+			switch(chatMessage.getType()) {
+			case LOGOUT:
+				break loop;
+			
+			case MESSAGE:
+				System.out.println(clientUsername + ": " + chatMessage.getMessage());
+				parentServer.broadCast( clientUsername + ": " + chatMessage.getMessage() );
+				break;
+			}
+		}
+		closeResources();
+	}
+	
+	public void writeMessageToClient(String message) throws IOException {
+			toClient.writeObject(message);
+			toClient.flush();
 	}
 
 	public String getClientUsername() {
@@ -79,7 +112,7 @@ public class ClientHandler implements Runnable {
 		return handlerID;
 	}
 	
-	private void closeResources() {
+	public void closeResources() {
 		try {
 			if (connWithClient != null)
 				connWithClient.close();

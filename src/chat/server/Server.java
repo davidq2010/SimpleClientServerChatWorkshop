@@ -43,9 +43,15 @@ public class Server {
 			}
 			
 			System.out.println("Creating new client handler for new client...");
-			ClientHandler handler = new ClientHandler(connWithClient, handlerID, this);
+			ClientHandler handler;
+			// Broadcast that user joined here
+			try {
+				handler = new ClientHandler(connWithClient, handlerID, this);
+			} catch (IOException e1) {
+				System.out.println(e1.getMessage());
+				continue;
+			}
 			
-			System.out.println(handler.getClientUsername() + " has joined.");
 			handlers.add(handler);
 			handlerID++;
 			
@@ -73,6 +79,18 @@ public class Server {
 		}
 		System.out.println("Number of Handlers: " + handlers.size());
 		System.out.println("Number of Threads: " + threads.size());
+	}
+	
+	synchronized public void broadCast(String message) {
+		for ( int i = handlers.size() - 1; i >= 0; i-- ) {
+			try {
+				handlers.get(i).writeMessageToClient(message);
+			} catch (IOException e) {
+				System.err.println("ERROR: Could not send message to " + handlers.get(i).getClientUsername());
+				System.err.println("Removing " + handlers.get(i).getClientUsername() + " from the chat.");
+				handlers.get(i).closeResources();
+			}
+		}
 	}
 	
 	private void closeResources() {
